@@ -19,23 +19,44 @@ for i in range(1,len(dados)): #Para cada hora do dia
     #    fun.append(dados[i+1][j+?])
     fun.append(float(dados[i][3]))
 
+#print(fun)
+#print(fun[2])
+restricoesIgualdade = [] #Restrições de igualdade energetica
+for i in range(24): #Para cada hora do dia
+    rest = [0 for i in range(len(fun))] #Tabela inicial base
+    for j in range(GENERATOR_TYPES+1):
+        rest[i*4+j] = 1
+    restricoesIgualdade.append(rest)
+
+independent = []
+for i in range(1,len(dados)):
+    independent.append(dados[i][6])
+#print(independent)
+bounds = []
+for i in range(1,len(dados)):
+    for j in range(GENERATOR_TYPES+1):
+        bound = None
+        if j < 2:
+            bound = (0,float(dados[i][4+j]))
+        if j is 2:
+            bound = (6,30)
+        elif j is 3:
+            bound = (0,95)
+        bounds.append(bound)
+bounds = tuple(bounds)
+#print(bounds)
+#print(independent)
 fun = np.array(fun)
-print(fun)
+restricoesIgualdade = np.array(restricoesIgualdade)
+independent = np.array(independent)
+
+res = linprog(c = fun, A_eq=restricoesIgualdade, b_eq=independent,bounds=bounds,method='simplex')
+#print(list(res.x))
+print(res.fun)
+org = []
+for i in range(0,len(list(res.x))+1, 4):
+    org.append(list(res.x)[i:i+4])
+for hora in org:
+    print(hora)
 input()
-#FAZER AS RESTRIÇÕES AGORA
-#where
-#2x1 + 5x2 <= 10
-#5x1 + 4x2 <= 25
-#constraints = np.array([
-#    [3,1,5],
-#    [7,8,14],
-#    [1,5,2],
-#])
-#independent = np.array([17,94,15])
 
-#res = linprog(c=-fun, A_ub=constraints, b_ub=independent, bounds=(0,None), method='simplex')
-
-#print(res.fun)
-#assert res.fun == -136/5
-#print(res.x)
-#print(res.slack)
